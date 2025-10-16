@@ -1,32 +1,32 @@
 # Unified IPTV AceStream Platform
 
-Piattaforma IPTV unificata che combina il meglio di acestream-scraper, pyacexy e xtream_api in un'unica soluzione completa.
+A unified IPTV platform that combines the best of acestream-scraper, pyacexy and xtream_api into a complete solution.
 
-## 🚀 Caratteristiche
+## 🚀 Features
 
 ### Core Features
-- **Scraping Automatico**: Raccolta automatica canali AceStream da multiple fonti
-- **Xtream Codes API**: Compatibilità completa con IPTV Smarters, Perfect Player, TiviMate
-- **Proxy AceStream Integrato**: Gestione intelligente stream con multiplexing
-- **EPG Completo**: Electronic Program Guide con aggregazione da fonti multiple
-- **Gestione Utenti**: Sistema completo autenticazione e autorizzazione
-- **Dashboard Web**: Interfaccia amministrazione moderna e intuitiva
+- **Automatic Scraping**: Automatic AceStream channel collection from multiple sources
+- **Xtream Codes API**: Full compatibility with IPTV Smarters, Perfect Player, TiviMate
+- **Integrated AceStream Proxy**: Intelligent stream management with multiplexing
+- **Complete EPG**: Electronic Program Guide with aggregation from multiple sources
+- **User Management**: Complete authentication and authorization system
+- **Web Dashboard**: Modern and intuitive administration interface
 
 ### Advanced Features
-- Acestream Engine integrato con Acexy proxy
-- Supporto ZeroNet per fonti decentralizzate
-- Cloudflare WARP per geo-unblocking
-- Channel status monitoring in tempo reale
-- Auto-rescraping configurabile
-- Database SQLAlchemy con migrations
-- Health checking e monitoring
-- API REST documentata (OpenAPI/Swagger)
+- Integrated Acestream Engine with Acexy proxy
+- ZeroNet support for decentralized sources
+- Cloudflare WARP for geo-unblocking
+- Real-time channel status monitoring
+- Configurable auto-rescraping
+- SQLAlchemy database with migrations
+- Health checking and monitoring
+- Documented REST API (OpenAPI/Swagger)
 
-## 📋 Architettura
+## 📋 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              Client IPTV (Player)                       │
+│              IPTV Client (Player)                       │
 │  (IPTV Smarters, VLC, Kodi, Perfect Player)            │
 └──────────────────────┬──────────────────────────────────┘
                        │ Xtream API
@@ -48,74 +48,74 @@ Piattaforma IPTV unificata che combina il meglio di acestream-scraper, pyacexy e
 └─────────────────────────────────────────────────────────┘
 ```
 
-## 🛠️ Installazione
+## 🛠️ Installation
 
-### Metodo 1: Setup Wizard Interattivo (Raccomandato)
+### Method 1: Interactive Setup Wizard (Recommended)
 
-Il modo più semplice per iniziare:
+The easiest way to get started:
 
 ```bash
 # Clone repository
 git clone <repository-url>
 cd unified-iptv-acestream
 
-# Installa dipendenze
+# Install dependencies
 pip install -r requirements.txt
 
-# Avvia il setup wizard interattivo
+# Run interactive setup wizard
 python3 setup_wizard.py
 ```
 
-Il wizard ti guiderà attraverso:
-1. **Configurazione Server**: Host, porta, timezone
-2. **AceStream**: Engine host/porta, timeout e parametri streaming
-3. **Scraper**: URL playlist M3U e intervallo di aggiornamento
-4. **EPG**: Fonti Electronic Program Guide
-5. **Database**: Configurazione SQLite o altro
-6. **Admin**: Username e password (cambia il default!)
-7. **Security**: Generazione automatica chiave segreta
+The wizard will guide you through:
+1. **Server Configuration**: Host, port, timezone
+2. **AceStream**: Engine host/port, timeout and streaming parameters
+3. **Scraper**: M3U playlist URLs and update interval
+4. **EPG**: Electronic Program Guide sources
+5. **Database**: SQLite or other database configuration
+6. **Admin**: Username and password (change the default!)
+7. **Security**: Automatic secret key generation
 
-### Metodo 2: Docker (Produzione)
+### Method 2: Docker (Production)
 
 ```bash
-# Crea configurazione
+# Create configuration
 cp .env.example .env
-nano .env  # Modifica configurazione
+nano .env  # Edit configuration
 
-# Avvia con Docker Compose
+# Start with Docker Compose
 docker-compose up -d
 ```
 
-### Metodo 3: Installazione Manuale
+### Method 3: Manual Installation
 
 ```bash
-# Clone e setup
+# Clone and setup
 git clone <repository-url>
 cd unified-iptv-acestream
 
-# Crea virtual environment
+# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# Installa dipendenze
+# Install dependencies
 pip install -r requirements.txt
 
-# Configura manualmente
+# Configure manually
 cp .env.example .env
-nano .env  # Edita configurazione
+nano .env  # Edit configuration
 
-# Inizializza database
+# Initialize database
 python3 setup.py
 
-# Avvia
+# Start
 python main.py
 ```
 
-## ⚙️ Configurazione
+## ⚙️ Configuration
 
-### Variabili d'Ambiente
+### Environment Variables
 
-Il file `.env` contiene tutte le configurazioni (26 variabili):
+The `.env` file contains all configurations (26 variables):
 
 #### Server
 ```env
@@ -133,7 +133,7 @@ ACESTREAM_ENGINE_PORT=6878
 ACESTREAM_TIMEOUT=15
 ```
 
-#### AceStream Streaming (Avanzato)
+#### AceStream Streaming (Advanced)
 ```env
 ACESTREAM_STREAMING_HOST=127.0.0.1
 ACESTREAM_STREAMING_PORT=8001
@@ -171,16 +171,16 @@ SECRET_KEY=your-secret-key-here
 ACCESS_TOKEN_EXPIRE_MINUTES=43200
 ```
 
-### Configurazione Docker
+### Docker Configuration
 
-Per configurazione personalizzata, crea un file `.env`:
+For custom configuration, create a `.env` file:
 
 ```bash
 cp .env.example .env
 nano .env
 ```
 
-Poi modifica `docker-compose.yml` per usare il file `.env`:
+Then modify `docker-compose.yml` to use the `.env` file:
 
 ```yaml
 services:
@@ -189,21 +189,21 @@ services:
       - .env
 ```
 
-**Importante**: Non commitare mai il file `.env` con credenziali reali!
+**Important**: Never commit the `.env` file with real credentials!
 
-## 🔒 Sicurezza
+## 🔒 Security
 
-### Dashboard Protetta
-- Dashboard accessibile solo da localhost per default
-- Autenticazione HTTP Basic richiesta
-- Accesso remoto via SSH tunnel o reverse proxy
+### Protected Dashboard
+- Dashboard accessible only from localhost by default
+- HTTP Basic authentication required
+- Remote access via SSH tunnel or reverse proxy
 
-### Accesso Remoto alla Dashboard
+### Remote Dashboard Access
 
 #### Via SSH Tunnel
 ```bash
 ssh -L 8000:localhost:58055 user@your-server
-# Poi apri: http://localhost:8000
+# Then open: http://localhost:8000
 ```
 
 #### Via Reverse Proxy (nginx)
@@ -227,22 +227,22 @@ server {
 }
 ```
 
-### Checklist Sicurezza Produzione
+### Production Security Checklist
 
-- [ ] Cambia `ADMIN_PASSWORD` (minimo 12 caratteri)
-- [ ] Genera nuovo `SECRET_KEY` (64+ caratteri)
-- [ ] Dashboard solo su localhost o dietro reverse proxy
-- [ ] Abilita HTTPS per connessioni esterne
-- [ ] Usa firewall per limitare accesso porte
-- [ ] Backup regolari database
-- [ ] Monitora logs per accessi sospetti
+- [ ] Change `ADMIN_PASSWORD` (minimum 12 characters)
+- [ ] Generate new `SECRET_KEY` (64+ characters)
+- [ ] Dashboard only on localhost or behind reverse proxy
+- [ ] Enable HTTPS for external connections
+- [ ] Use firewall to limit port access
+- [ ] Regular database backups
+- [ ] Monitor logs for suspicious access
 
 ## 🔌 API Endpoints
 
-### Xtream Codes API (Compatibile con tutti i player IPTV)
+### Xtream Codes API (Compatible with all IPTV players)
 
 ```
-# Autenticazione e info
+# Authentication and info
 GET  /player_api.php?username={user}&password={pass}
 
 # Live Streams
@@ -262,69 +262,69 @@ http://server:port/{username}/{password}/{stream_id}
 
 ```
 # Channels
-GET    /api/channels              # Lista canali
-POST   /api/channels              # Aggiungi canale
-PUT    /api/channels/{id}         # Aggiorna canale
-DELETE /api/channels/{id}         # Elimina canale
-GET    /api/channels/{id}/status  # Status canale
+GET    /api/channels              # List channels
+POST   /api/channels              # Add channel
+PUT    /api/channels/{id}         # Update channel
+DELETE /api/channels/{id}         # Delete channel
+GET    /api/channels/{id}/status  # Channel status
 
 # Scraping
-GET    /api/scraper/urls          # Lista URL scraping
-POST   /api/scraper/urls          # Aggiungi URL
-POST   /api/scraper/refresh       # Forza refresh
-GET    /api/scraper/status        # Status scraper
+GET    /api/scraper/urls          # List scraping URLs
+POST   /api/scraper/urls          # Add URL
+POST   /api/scraper/refresh       # Force refresh
+GET    /api/scraper/status        # Scraper status
 
 # Users
-GET    /api/users                 # Lista utenti
-POST   /api/users                 # Crea utente
-PUT    /api/users/{id}            # Aggiorna utente
-DELETE /api/users/{id}            # Elimina utente
+GET    /api/users                 # List users
+POST   /api/users                 # Create user
+PUT    /api/users/{id}            # Update user
+DELETE /api/users/{id}            # Delete user
 ```
 
-### Playlist M3U
+### M3U Playlist
 
 ```
-# Playlist completa
+# Complete playlist
 GET  /playlist.m3u
 
-# Playlist con refresh forzato
+# Playlist with forced refresh
 GET  /playlist.m3u?refresh=true
 
-# Playlist filtrata per categoria
+# Filtered playlist by category
 GET  /playlist.m3u?category={name}
 
-# Playlist con ricerca
+# Playlist with search
 GET  /playlist.m3u?search={query}
 ```
 
-## 📺 Utilizzo con Player IPTV
+## 📺 Usage with IPTV Players
 
 ### IPTV Smarters Pro
 
-1. Seleziona "Login with Xtream Codes API"
-2. Inserisci:
+1. Select "Login with Xtream Codes API"
+2. Enter:
    - **Server**: `http://your-server-ip:58055`
-   - **Username**: admin (o quello configurato)
-   - **Password**: (quella configurata)
-3. Clicca "Add User"
+   - **Username**: admin (or configured)
+   - **Password**: (configured password)
+3. Click "Add User"
 
 ### Perfect Player
 
-1. Vai in Settings → General → Playlist
-2. Seleziona "Playlist type: XTREAM CODES"
-3. Inserisci:
+1. Go to Settings → General → Playlist
+2. Select "Playlist type: XTREAM CODES"
+3. Enter:
    - **Server**: `http://your-server-ip:58055`
    - **Username**: admin
-   - **Password**: (quella configurata)
+   - **Password**: (configured password)
 
 ### TiviMate
 
-1. Aggiungi Playlist
-2. Seleziona "Xtream Codes API"
-3. Inserisci:
+1. Add Playlist
+2. Select "Xtream Codes API"
+3. Enter:
    - **Server**: `http://your-server-ip:58055`
    - **Username**: admin
-   - **Password**: (quella configurata)
+   - **Password**: (configured password)
 
 ### VLC / Kodi (M3U)
 
@@ -332,26 +332,26 @@ GET  /playlist.m3u?search={query}
 http://your-server-ip:58055/get.php?username=admin&password=yourpass&type=m3u_plus
 ```
 
-## 🎯 Quick Start Esempi
+## 🎯 Quick Start Examples
 
-### Esempio 1: Setup Veloce con Wizard
+### Example 1: Fast Setup with Wizard
 
 ```bash
 git clone <repository-url>
 cd unified-iptv-acestream
 pip3 install -r requirements.txt
 python3 setup_wizard.py
-# Segui il wizard (premi Enter per defaults)
+# Follow the wizard (press Enter for defaults)
 python3 main.py
 ```
 
-### Esempio 2: Docker Compose Rapido
+### Example 2: Quick Docker Compose
 
 ```bash
 git clone <repository-url>
 cd unified-iptv-acestream
 
-# Modifica solo password in docker-compose.yml
+# Only modify password in docker-compose.yml
 nano docker-compose.yml
 
 docker-compose up -d
@@ -360,22 +360,22 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-### Esempio 3: Configurazione Custom
+### Example 3: Custom Configuration
 
 ```bash
 cp .env.example .env
-nano .env  # Modifica le tue impostazioni
+nano .env  # Modify your settings
 
-python3 setup.py  # Inizializza DB
-python3 main.py   # Avvia
+python3 setup.py  # Initialize DB
+python3 main.py   # Start
 ```
 
-## 🔧 Gestione e Manutenzione
+## 🔧 Management and Maintenance
 
 ### Docker Commands
 
 ```bash
-# Avvia
+# Start
 docker-compose up -d
 
 # Stop
@@ -387,7 +387,7 @@ docker-compose restart
 # Logs
 docker-compose logs -f
 
-# Logs specifici
+# Specific logs
 docker-compose logs -f unified-iptv
 
 # Update
@@ -400,13 +400,13 @@ docker-compose down
 docker system prune -a
 ```
 
-### Backup e Restore
+### Backup and Restore
 
 ```bash
 # Backup database
 cp data/unified-iptv.db data/unified-iptv.db.backup
 
-# Backup completo
+# Complete backup
 tar -czf backup-$(date +%Y%m%d).tar.gz data/ config/ .env
 
 # Restore
@@ -419,7 +419,7 @@ tar -xzf backup-20240116.tar.gz
 # Health check
 curl http://localhost:58055/health
 
-# Stats AceProxy
+# AceProxy stats
 curl http://localhost:58055/api/aceproxy/stats
 
 # Scraper status
@@ -428,84 +428,33 @@ curl http://localhost:58055/api/scraper/status
 # EPG status
 curl http://localhost:58055/api/epg/status
 ```
-    ],
-    "enable_zeronet": true
-  }
-}
-```
 
-### Multiple User Management
+## 📖 Documentation
 
-```python
-# Via API
-POST /api/users
-{
-  "username": "user1",
-  "password": "pass123",
-  "max_connections": 2,
-  "is_trial": false,
-  "expiry_date": "2024-12-31"
-}
-```
+- **[Setup Wizard Guide](QUICK_START_WIZARD.md)** - Complete setup wizard guide
+- **[Docker Guide](DOCKER_GUIDE.md)** - Complete Docker guide with examples
+- **[Security Update](SECURITY_UPDATE.md)** - Dashboard security information
+- **[Italian README](README_IT.md)** - Italian version
 
-## 📊 Monitoring e Logs
+## 🤝 Contributing
 
-### Health Check
+Contributions are welcome! Please read the contributing guidelines first.
 
-```bash
-curl http://localhost:8000/health
-```
+## 📄 License
 
-### Dashboard Web
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-Accedi a `http://localhost:8000` per:
-- Statistiche canali (totali, online, offline)
-- Gestione utenti
-- Configurazione scraper
-- Monitoring stream in tempo reale
-- Log viewer
+## 🙏 Acknowledgments
 
-### Logs
+This project combines and extends:
+- [acestream-scraper](https://github.com/acestream/acestream-scraper) - Channel scraping
+- [pyacexy](https://github.com/pyacexy/pyacexy) - AceStream proxy
+- [xtream-api](https://github.com/xtream-codes/xtream-api) - Xtream Codes API implementation
 
-```bash
-# Docker
-docker logs unified-iptv -f
+## 📞 Support
 
-# Manuale
-tail -f logs/app.log
-```
+For issues, questions, or contributions, please open an issue on GitHub.
 
-## 🔒 Sicurezza
+---
 
-- Autenticazione richiesta per Xtream API
-- Supporto HTTPS con certificati SSL
-- Rate limiting per API
-- Protezione CSRF per dashboard
-- Password hashing con bcrypt
-- Token session con scadenza
-
-## 🚀 Performance
-
-- Database connection pooling
-- Async I/O con aiohttp
-- Stream buffering intelligente
-- Caching EPG e metadati
-- Lazy loading canali
-- Multi-client stream sharing
-
-## 🤝 Contributi
-
-Basato su:
-- [acestream-scraper](https://github.com/Pipepito/acestream-scraper) - Scraping e playlist
-- [pyacexy](https://github.com/Javinator9889/acexy) - Proxy AceStream
-- [xtream_api](https://github.com/Divarion-D/xtream_api) - Xtream Codes API
-
-## 📄 Licenza
-
-MIT License - vedi LICENSE file
-
-## 🆘 Supporto
-
-- Documentation: `/docs`
-- Issues: GitHub Issues
-- API Docs: `http://localhost:8000/api/docs`
+**⚠️ Disclaimer**: This software is for educational purposes only. Ensure you have the right to stream content and comply with local laws.
