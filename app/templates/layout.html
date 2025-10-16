@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="it" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Unified IPTV Platform{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+        
+        body {
+            min-height: 100vh;
+            background-color: var(--bs-body-bg);
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background-color: var(--bs-dark);
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: rgba(255, 255, 255, 1);
+        }
+        
+        .nav-link.active {
+            color: #fff;
+            background-color: var(--primary-color);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-online { background-color: var(--success-color); }
+        .status-offline { background-color: var(--danger-color); }
+        .status-pending { background-color: var(--warning-color); }
+        
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .stats-card {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .table-responsive {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+        }
+        
+        .spinner-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading">
+        <div class="spinner-container">
+            <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
+                <div class="position-sticky pt-3">
+                    <div class="px-3 mb-4">
+                        <h5 class="text-white">
+                            <i class="bi bi-tv"></i> Unified IPTV
+                        </h5>
+                        <small class="text-muted">v1.0.0</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% block dashboard_active %}{% endblock %}" href="/">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block channels_active %}{% endblock %}" href="/channels">
+                                <i class="bi bi-collection-play"></i> Channels
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block users_active %}{% endblock %}" href="/users">
+                                <i class="bi bi-people"></i> Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block scraper_active %}{% endblock %}" href="/scraper">
+                                <i class="bi bi-download"></i> Scraper
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block epg_active %}{% endblock %}" href="/epg">
+                                <i class="bi bi-calendar3"></i> EPG
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block settings_active %}{% endblock %}" href="/settings">
+                                <i class="bi bi-gear"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white">
+                    
+                    <div class="px-3">
+                        <h6 class="text-muted">Services</h6>
+                        <div class="mb-2">
+                            <span class="status-badge" id="aceproxyStatus"></span>
+                            <small class="text-white-50">AceProxy</small>
+                        </div>
+                        <div class="mb-2">
+                            <span class="status-badge" id="scraperStatus"></span>
+                            <small class="text-white-50">Scraper</small>
+                        </div>
+                        <div class="mb-2">
+                            <span class="status-badge" id="epgServiceStatus"></span>
+                            <small class="text-white-50">EPG</small>
+                        </div>
+                    </div>
+                    
+                    <hr class="text-white">
+                    
+                    <div class="px-3">
+                        <button id="themeToggle" class="btn btn-sm btn-outline-light w-100">
+                            <i class="bi bi-moon-fill" id="themeIcon"></i>
+                            <span id="themeText">Dark Mode</span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">{% block page_title %}Dashboard{% endblock %}</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        {% block page_actions %}{% endblock %}
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <div id="alertContainer"></div>
+
+                <!-- Page Content -->
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const html = document.documentElement;
+        
+        // Load saved theme
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-bs-theme', currentTheme);
+        updateThemeButton(currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButton(newTheme);
+        });
+        
+        function updateThemeButton(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'bi bi-sun-fill';
+                themeText.textContent = 'Light Mode';
+            } else {
+                themeIcon.className = 'bi bi-moon-fill';
+                themeText.textContent = 'Dark Mode';
+            }
+        }
+        
+        // Check services status
+        async function checkServicesStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                document.getElementById('aceproxyStatus').className = 
+                    'status-badge ' + (data.services.aceproxy ? 'status-online' : 'status-offline');
+                document.getElementById('scraperStatus').className = 
+                    'status-badge ' + (data.services.scraper ? 'status-online' : 'status-offline');
+                document.getElementById('epgServiceStatus').className = 
+                    'status-badge ' + (data.services.epg ? 'status-online' : 'status-offline');
+            } catch (error) {
+                console.error('Error checking services:', error);
+            }
+        }
+        
+        // Check status on load and every 30 seconds
+        checkServicesStatus();
+        setInterval(checkServicesStatus, 30000);
+        
+        // Show/hide loading overlay
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // Show alert message
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

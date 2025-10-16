@@ -1,0 +1,497 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - Unified IPTV Platform{% endblock %}
+{% block dashboard_active %}active{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Total Channels</h6>
+                <h2 class="card-title mb-0" id="totalChannels">
+                    <span class="spinner-border spinner-border-sm"></span>
+                </h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Active Streams</h6>
+                <h2 class="card-title mb-0" id="activeStreams">
+                    <span class="spinner-border spinner-border-sm"></span>
+                </h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Total Users</h6>
+                <h2 class="card-title mb-0" id="totalUsers">
+                    <span class="spinner-border spinner-border-sm"></span>
+                </h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Active Connections</h6>
+                <h2 class="card-title mb-0" id="activeConnections">
+                    <span class="spinner-border spinner-border-sm"></span>
+                </h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services Status -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Services Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><i class="bi bi-hdd-network"></i> AceProxy</td>
+                                <td><span class="badge" id="aceproxyStatusBadge">Checking...</span></td>
+                                <td id="aceproxyDetails">-</td>
+                                <td>
+                                    <a href="/api/aceproxy/stats" class="btn btn-sm btn-outline-primary" target="_blank">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><i class="bi bi-download"></i> Scraper</td>
+                                <td><span class="badge" id="scraperStatusBadge">Checking...</span></td>
+                                <td id="scraperDetails">-</td>
+                                <td>
+                                    <a href="/scraper" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-box-arrow-up-right"></i> Manage
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><i class="bi bi-calendar3"></i> EPG Service</td>
+                                <td><span class="badge" id="epgStatusBadge">Checking...</span></td>
+                                <td id="epgDetails">-</td>
+                                <td>
+                                    <a href="/epg" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-box-arrow-up-right"></i> Manage
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="d-grid">
+                            <a href="/channels" class="btn btn-outline-primary">
+                                <i class="bi bi-collection-play"></i> Manage Channels
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-grid">
+                            <a href="/users" class="btn btn-outline-success">
+                                <i class="bi bi-person-plus"></i> Add User
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-grid">
+                            <a href="/settings" class="btn btn-outline-secondary">
+                                <i class="bi bi-gear"></i> Configuration
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Active AceStream Streams</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="activeStreamsTable">
+                        <thead>
+                            <tr>
+                                <th>Channel Name</th>
+                                <th>Connected Users</th>
+                                <th>Started</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    <div class="spinner-border spinner-border-sm"></div>
+                                    Loading...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Application Logs -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Application Logs</h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="refreshLogs()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" id="autoRefreshBtn" onclick="toggleAutoRefresh()">
+                        <i class="bi bi-play-circle"></i> Auto Refresh
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="downloadLogs()">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="clearLogs()">
+                        <i class="bi bi-trash"></i> Clear
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label for="logLines">Number of lines to display:</label>
+                    <select class="form-control form-control-sm" id="logLines" onchange="refreshLogs()" style="width: auto; display: inline-block;">
+                        <option value="50">50</option>
+                        <option value="100" selected>100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                    </select>
+                </div>
+                <div id="logsContainer" style="background-color: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 5px; max-height: 500px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px;">
+                    <div class="text-center">
+                        <div class="spinner-border spinner-border-sm text-light"></div>
+                        Loading logs...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Load dashboard stats
+async function loadStats() {
+    try {
+        const response = await fetch('/api/dashboard/stats');
+        const data = await response.json();
+        
+        document.getElementById('totalChannels').textContent = data.total_channels || 0;
+        document.getElementById('activeStreams').textContent = data.active_streams || 0;
+        document.getElementById('totalUsers').textContent = data.total_users || 0;
+        document.getElementById('activeConnections').textContent = data.active_connections || 0;
+    } catch (error) {
+        console.error('Error loading stats:', error);
+        document.getElementById('totalChannels').textContent = '-';
+        document.getElementById('activeStreams').textContent = '-';
+        document.getElementById('totalUsers').textContent = '-';
+        document.getElementById('activeConnections').textContent = '-';
+    }
+}
+
+// Load service status
+async function loadServiceStatus() {
+    try {
+        const response = await fetch('/api/health');
+        const data = await response.json();
+        
+        // AceProxy
+        if (data.services.aceproxy) {
+            document.getElementById('aceproxyStatusBadge').className = 'badge bg-success';
+            document.getElementById('aceproxyStatusBadge').textContent = 'Online';
+            document.getElementById('aceproxyDetails').textContent = `${data.aceproxy_streams || 0} active streams`;
+        } else {
+            document.getElementById('aceproxyStatusBadge').className = 'badge bg-danger';
+            document.getElementById('aceproxyStatusBadge').textContent = 'Offline';
+            document.getElementById('aceproxyDetails').textContent = '-';
+        }
+        
+        // Scraper
+        if (data.services.scraper) {
+            document.getElementById('scraperStatusBadge').className = 'badge bg-success';
+            document.getElementById('scraperStatusBadge').textContent = 'Running';
+            document.getElementById('scraperDetails').textContent = 'Active';
+        } else {
+            document.getElementById('scraperStatusBadge').className = 'badge bg-warning';
+            document.getElementById('scraperStatusBadge').textContent = 'Idle';
+            document.getElementById('scraperDetails').textContent = 'Not active';
+        }
+        
+        // EPG
+        if (data.services.epg) {
+            document.getElementById('epgStatusBadge').className = 'badge bg-success';
+            document.getElementById('epgStatusBadge').textContent = 'Running';
+            document.getElementById('epgDetails').textContent = 'Active';
+        } else {
+            document.getElementById('epgStatusBadge').className = 'badge bg-warning';
+            document.getElementById('epgStatusBadge').textContent = 'Idle';
+            document.getElementById('epgDetails').textContent = 'Not active';
+        }
+    } catch (error) {
+        console.error('Error loading service status:', error);
+    }
+}
+
+// Load active streams
+async function loadActiveStreams() {
+    try {
+        const response = await fetch('/api/aceproxy/streams');
+        const data = await response.json();
+        
+        const tbody = document.querySelector('#activeStreamsTable tbody');
+        
+        if (!data.streams || data.streams.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center">No active streams</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = data.streams.map(stream => {
+            // Format client list
+            const clientsList = stream.clients.map(client => {
+                const connectedTime = new Date(client.connected_at).toLocaleTimeString();
+                
+                // Check if this is a merged connection (multiple physical connections)
+                if (client.connection_count && client.connection_count > 1) {
+                    // Build tooltip with all User-Agents
+                    const tooltip = client.physical_connections 
+                        ? client.physical_connections.join('\\n') 
+                        : '';
+                    
+                    return `<div class="small" title="${tooltip}">
+                        <i class="bi bi-person-fill"></i> <strong>${client.username}</strong>
+                        <span class="badge bg-info ms-1">${client.connection_count} conn</span>
+                        <span class="text-muted">(${client.ip} - ${connectedTime})</span>
+                    </div>`;
+                } else {
+                    // Single connection - show normally
+                    return `<div class="small">
+                        <i class="bi bi-person-fill"></i> <strong>${client.username}</strong>
+                        <span class="text-muted">(${client.ip} - ${connectedTime})</span>
+                    </div>`;
+                }
+            }).join('');
+            
+            // Show physical connections count if different from client count
+            const physicalNote = stream.physical_connections > stream.client_count 
+                ? `<small class="text-muted">(${stream.physical_connections} physical connections)</small>` 
+                : '';
+            
+            return `
+            <tr>
+                <td><strong>${stream.channel_name}</strong><br/>
+                    <small class="text-muted">${stream.stream_id.substring(0, 16)}...</small>
+                </td>
+                <td>
+                    <span class="badge bg-primary">${stream.client_count}</span> ${physicalNote}
+                    ${clientsList}
+                </td>
+                <td>${new Date(stream.created_at).toLocaleString()}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-danger" onclick="closeStream('${stream.stream_id}')">
+                        <i class="bi bi-x-circle"></i> Close
+                    </button>
+                </td>
+            </tr>
+        `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading active streams:', error);
+        document.querySelector('#activeStreamsTable tbody').innerHTML = 
+            '<tr><td colspan="4" class="text-center text-danger">Error loading streams</td></tr>';
+    }
+}
+
+// Load logs
+async function refreshLogs() {
+    const lines = document.getElementById('logLines').value;
+    const container = document.getElementById('logsContainer');
+    
+    try {
+        const response = await fetch(`/api/logs/tail?lines=${lines}`);
+        const data = await response.json();
+        
+        if (data.lines && data.lines.length > 0) {
+            container.innerHTML = data.lines.map(line => {
+                // Color code based on log level
+                let color = '#d4d4d4'; // default
+                if (line.includes('ERROR')) color = '#f48771';
+                else if (line.includes('WARNING')) color = '#dcdcaa';
+                else if (line.includes('INFO')) color = '#4ec9b0';
+                else if (line.includes('DEBUG')) color = '#9cdcfe';
+                
+                return `<div style="color: ${color}; margin-bottom: 2px;">${escapeHtml(line)}</div>`;
+            }).join('');
+            
+            // Auto-scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        } else {
+            container.innerHTML = '<div class="text-center text-muted">No logs available</div>';
+        }
+    } catch (error) {
+        console.error('Error loading logs:', error);
+        container.innerHTML = '<div class="text-center text-danger">Error loading logs: ' + error.message + '</div>';
+    }
+}
+
+// WebSocket for real-time logs (disabled by default to avoid performance issues)
+let logsWebSocket = null;
+let useWebSocket = false; // User can enable manually
+let autoRefreshInterval = null;
+
+function toggleAutoRefresh() {
+    const btn = document.getElementById('autoRefreshBtn');
+    
+    if (autoRefreshInterval) {
+        // Stop auto-refresh
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+        btn.innerHTML = '<i class="bi bi-play-circle"></i> Auto Refresh';
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-outline-secondary');
+    } else {
+        // Start auto-refresh every 5 seconds
+        autoRefreshInterval = setInterval(refreshLogs, 5000);
+        btn.innerHTML = '<i class="bi bi-stop-circle"></i> Stop Auto';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-danger');
+    }
+}
+
+// Download logs
+async function downloadLogs() {
+    try {
+        const response = await fetch('/api/logs/download');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `app_logs_${new Date().toISOString().split('T')[0]}.log`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showAlert('Logs downloaded successfully', 'success');
+    } catch (error) {
+        console.error('Error downloading logs:', error);
+        showAlert('Error downloading logs', 'danger');
+    }
+}
+
+// Clear logs
+async function clearLogs() {
+    if (!confirm('Are you sure you want to clear all logs? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/logs/clear', { method: 'DELETE' });
+        const data = await response.json();
+        showAlert(data.message, 'success');
+        refreshLogs();
+    } catch (error) {
+        console.error('Error clearing logs:', error);
+        showAlert('Error clearing logs', 'danger');
+    }
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Close stream
+async function closeStream(streamId) {
+    if (!confirm(`Are you sure you want to close stream ${streamId}?`)) {
+        return;
+    }
+    
+    try {
+        showLoading();
+        const response = await fetch(`/api/aceproxy/streams/${streamId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showAlert('Stream closed successfully', 'success');
+            loadActiveStreams();
+        } else {
+            showAlert('Error closing stream', 'danger');
+        }
+    } catch (error) {
+        console.error('Error closing stream:', error);
+        showAlert('Error closing stream', 'danger');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Initialize
+loadStats();
+loadServiceStatus();
+loadActiveStreams();
+refreshLogs(); // Load initial logs
+
+// Refresh stats and services every 10 seconds
+setInterval(() => {
+    loadStats();
+    loadServiceStatus();
+    loadActiveStreams();
+}, 10000);
+</script>
+{% endblock %}

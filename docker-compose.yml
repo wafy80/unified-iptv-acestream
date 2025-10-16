@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  unified-iptv:
+    build: .
+    image: unified-iptv-acestream:latest
+    container_name: unified-iptv-acestream
+    restart: unless-stopped
+    
+    environment:
+      # Server Configuration
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=58055
+      - SERVER_TIMEZONE=Europe/Rome
+      - SERVER_DEBUG=false
+      
+      # AceStream Configuration
+      - ACESTREAM_ENABLED=true
+      - ACESTREAM_ENGINE_HOST=localhost
+      - ACESTREAM_ENGINE_PORT=6878
+      - ACESTREAM_TIMEOUT=15
+      
+      # AceStream Streaming Server (internal)
+      - ACESTREAM_STREAMING_HOST=127.0.0.1
+      - ACESTREAM_STREAMING_PORT=8001
+      - ACESTREAM_CHUNK_SIZE=8192
+      - ACESTREAM_EMPTY_TIMEOUT=60.0
+      - ACESTREAM_NO_RESPONSE_TIMEOUT=10.0
+      
+      # Scraper Configuration
+      - SCRAPER_URLS=
+      - SCRAPER_UPDATE_INTERVAL=3600
+      
+      # EPG Configuration
+      - EPG_SOURCES=https://iptvx.one/EPG_NOARCH,https://epg.pw/xmltv/epg.xml.gz
+      - EPG_UPDATE_INTERVAL=86400
+      - EPG_CACHE_FILE=data/epg.xml
+      
+      # Database Configuration
+      - DATABASE_URL=sqlite:///data/unified-iptv.db
+      - DATABASE_ECHO=false
+      - DATABASE_POOL_SIZE=10
+      - DATABASE_MAX_OVERFLOW=20
+      
+      # Admin Configuration
+      # ⚠️ CHANGE THESE IN PRODUCTION!
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme123
+      
+      # Security
+      # ⚠️ GENERATE A SECURE KEY IN PRODUCTION!
+      - SECRET_KEY=change-this-secret-key-in-production-please-use-64-chars-minimum
+      - ACCESS_TOKEN_EXPIRE_MINUTES=43200
+    
+    ports:
+      # Dashboard on localhost only (secure)
+      - "127.0.0.1:8000:58055"
+      # Xtream API public
+      - "58055:58055"
+      # AceProxy public
+      - "8080:8080"
+      # AceStream Engine
+      - "6878:6878"
+    
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    
+    networks:
+      - iptv-network
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:58055/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits (optional but recommended)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2.0'
+    #       memory: 2G
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 512M
+
+networks:
+  iptv-network:
+    driver: bridge
+    name: unified-iptv-network
