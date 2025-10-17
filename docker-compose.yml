@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  unified-iptv:
+    build: .
+    ports:
+      - "6880:6880"
+    volumes:
+      - ./data:/app/data
+      - ./.env:/app/.env
+    environment:
+      - ACESTREAM_ENGINE_HOST=acestream
+    depends_on:
+      - acestream
+
+  acestream:
+    image: wafy80/acestream
+    ports:
+      - "6878:6878"
+    restart: unless-stopped
