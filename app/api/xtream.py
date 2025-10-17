@@ -93,15 +93,23 @@ class ClientTracker:
             "time_create": int(time.time()),
         }
     
-    def get_client(self, ip, port):
+    def get_client(self, ip, port, requested_url=None):
         import time
         # Check if client is in the list
         logger.debug(f"Current clients: {self.clients}")
-        if f"{ip}:{port}" not in self.clients:
+        client_key = f"{ip}:{port}"
+        if client_key not in self.clients:
             return False
+        
+        # If a specific URL is requested, check if it matches
+        # If not, return False to force creation of new stream
+        if requested_url and self.clients[client_key]["url"] != requested_url:
+            logger.debug(f"Client {client_key} requesting different URL, forcing new stream")
+            return False
+        
         # Update time_create
-        self.clients[f"{ip}:{port}"]["time_create"] = int(time.time())
-        return self.clients[f"{ip}:{port}"]["url"]
+        self.clients[client_key]["time_create"] = int(time.time())
+        return self.clients[client_key]["url"]
     
     def remove_client(self):
         import time
@@ -382,30 +390,31 @@ async def stream_live_channel(
     
     # Check if channel has AceStream ID
     if channel.acestream_id:
-        # Check if we already have a client session
-        stream_url = CLIENT.get_client(request.client.host, str(request.client.port))
+        # Build the expected stream URL for this channel
+        real_client_ip = request.client.host
+        real_user_agent = request.headers.get("User-Agent", "Unknown")
+        
+        # URL encode parameters to handle special characters
+        from urllib.parse import quote
+        expected_stream_url = (
+            f"http://127.0.0.1:{config.server_port}/ace/getstream"
+            f"?id={channel.acestream_id}"
+            f"&username={username}"
+            f"&client_ip={quote(real_client_ip)}"
+            f"&client_ua={quote(real_user_agent)}"
+        )
+        
+        # Add query parameters if present
+        if request.query_params:
+            for key, value in request.query_params.items():
+                expected_stream_url += f"&{key}={value}"
+        
+        # Check if we already have a client session for THIS specific stream
+        stream_url = CLIENT.get_client(request.client.host, str(request.client.port), expected_stream_url)
         
         if stream_url is False:
-            # Use internal /ace/getstream endpoint (AceProxyService with multiplexing)
-            # This is REQUIRED for multiple connections support!
-            # Pass username, real client IP and User-Agent for accurate tracking
-            real_client_ip = request.client.host
-            real_user_agent = request.headers.get("User-Agent", "Unknown")
-            
-            # URL encode parameters to handle special characters
-            from urllib.parse import quote
-            stream_url = (
-                f"http://127.0.0.1:{config.server_port}/ace/getstream"
-                f"?id={channel.acestream_id}"
-                f"&username={username}"
-                f"&client_ip={quote(real_client_ip)}"
-                f"&client_ua={quote(real_user_agent)}"
-            )
-            
-            # Add query parameters if present
-            if request.query_params:
-                for key, value in request.query_params.items():
-                    stream_url += f"&{key}={value}"
+            # Use the expected stream URL (new stream needed)
+            stream_url = expected_stream_url
         else:
             CLIENT.remove_client()
     

@@ -243,58 +243,56 @@ class Config:
     def load(cls):
         """Load configuration from environment variables"""
         # Server Configuration
-        cls.SERVER_HOST = cls._get_env("SERVER_HOST", default="0.0.0.0")
-        cls.SERVER_PORT = cls._parse_int("SERVER_PORT", default=6880, min_value=1, max_value=65535)
-        cls.SERVER_TIMEZONE = cls._get_env("SERVER_TIMEZONE", default="Europe/Rome")
-        cls.SERVER_DEBUG = cls._parse_bool("SERVER_DEBUG", default=False)
+        cls.SERVER_HOST = cls._get_env("SERVER_HOST")
+        cls.SERVER_PORT = cls._parse_int("SERVER_PORT", min_value=1, max_value=65535)
+        cls.SERVER_TIMEZONE = cls._get_env("SERVER_TIMEZONE")
+        cls.SERVER_DEBUG = cls._parse_bool("SERVER_DEBUG")
         
         # AceStream Configuration
-        cls.ACESTREAM_ENABLED = cls._parse_bool("ACESTREAM_ENABLED", default=True)
-        cls.ACESTREAM_ENGINE_HOST = cls._get_env("ACESTREAM_ENGINE_HOST", default="localhost")
-        cls.ACESTREAM_ENGINE_PORT = cls._parse_int("ACESTREAM_ENGINE_PORT", default=6878, 
+        cls.ACESTREAM_ENABLED = cls._parse_bool("ACESTREAM_ENABLED")
+        cls.ACESTREAM_ENGINE_HOST = cls._get_env("ACESTREAM_ENGINE_HOST")
+        cls.ACESTREAM_ENGINE_PORT = cls._parse_int("ACESTREAM_ENGINE_PORT", 
                                                      min_value=1, max_value=65535)
-        cls.ACESTREAM_TIMEOUT = cls._parse_int("ACESTREAM_TIMEOUT", default=15, 
+        cls.ACESTREAM_TIMEOUT = cls._parse_int("ACESTREAM_TIMEOUT", 
                                                 min_value=1, max_value=300)
         
         # AceStream Streaming Server (internal)
-        cls.ACESTREAM_STREAMING_HOST = cls._get_env("ACESTREAM_STREAMING_HOST", default="127.0.0.1")
-        cls.ACESTREAM_STREAMING_PORT = cls._parse_int("ACESTREAM_STREAMING_PORT", default=6881,
+        cls.ACESTREAM_STREAMING_HOST = cls._get_env("ACESTREAM_STREAMING_HOST")
+        cls.ACESTREAM_STREAMING_PORT = cls._parse_int("ACESTREAM_STREAMING_PORT",
                                                         min_value=1, max_value=65535)
-        cls.ACESTREAM_CHUNK_SIZE = cls._parse_int("ACESTREAM_CHUNK_SIZE", default=8192,
+        cls.ACESTREAM_CHUNK_SIZE = cls._parse_int("ACESTREAM_CHUNK_SIZE",
                                                    min_value=1024, max_value=1048576)
-        cls.ACESTREAM_EMPTY_TIMEOUT = cls._parse_float("ACESTREAM_EMPTY_TIMEOUT", default=60.0,
+        cls.ACESTREAM_EMPTY_TIMEOUT = cls._parse_float("ACESTREAM_EMPTY_TIMEOUT",
                                                         min_value=1.0, max_value=600.0)
         cls.ACESTREAM_NO_RESPONSE_TIMEOUT = cls._parse_float("ACESTREAM_NO_RESPONSE_TIMEOUT", 
-                                                              default=10.0, min_value=1.0, max_value=60.0)
+                                                              min_value=1.0, max_value=60.0)
         
         # Scraper Configuration
-        cls.SCRAPER_URLS = cls._parse_list("SCRAPER_URLS", default=[], allow_empty=True)
-        cls.SCRAPER_UPDATE_INTERVAL = cls._parse_int("SCRAPER_UPDATE_INTERVAL", default=3600,
+        cls.SCRAPER_URLS = cls._parse_list("SCRAPER_URLS", allow_empty=True)
+        cls.SCRAPER_UPDATE_INTERVAL = cls._parse_int("SCRAPER_UPDATE_INTERVAL",
                                                       min_value=60, max_value=86400)
         
         # EPG Configuration
-        cls.EPG_SOURCES = cls._parse_list("EPG_SOURCES", 
-                                          default=["https://iptvx.one/EPG_NOARCH", "https://epg.pw/xmltv/epg.xml.gz"],
-                                          allow_empty=True)
-        cls.EPG_UPDATE_INTERVAL = cls._parse_int("EPG_UPDATE_INTERVAL", default=86400,
+        cls.EPG_SOURCES = cls._parse_list("EPG_SOURCES", allow_empty=True)
+        cls.EPG_UPDATE_INTERVAL = cls._parse_int("EPG_UPDATE_INTERVAL",
                                                   min_value=3600, max_value=604800)
-        cls.EPG_CACHE_FILE = cls._get_env("EPG_CACHE_FILE", default="data/epg.xml")
+        cls.EPG_CACHE_FILE = cls._get_env("EPG_CACHE_FILE")
         
         # Database Configuration
-        cls.DATABASE_URL = cls._get_env("DATABASE_URL", default="sqlite:///data/unified-iptv.db")
-        cls.DATABASE_ECHO = cls._parse_bool("DATABASE_ECHO", default=False)
-        cls.DATABASE_POOL_SIZE = cls._parse_int("DATABASE_POOL_SIZE", default=10,
+        cls.DATABASE_URL = cls._get_env("DATABASE_URL")
+        cls.DATABASE_ECHO = cls._parse_bool("DATABASE_ECHO")
+        cls.DATABASE_POOL_SIZE = cls._parse_int("DATABASE_POOL_SIZE",
                                                  min_value=1, max_value=100)
-        cls.DATABASE_MAX_OVERFLOW = cls._parse_int("DATABASE_MAX_OVERFLOW", default=20,
+        cls.DATABASE_MAX_OVERFLOW = cls._parse_int("DATABASE_MAX_OVERFLOW",
                                                     min_value=0, max_value=100)
         
         # Admin User
-        cls.ADMIN_USERNAME = cls._get_env("ADMIN_USERNAME", default="admin")
-        cls.ADMIN_PASSWORD = cls._get_env("ADMIN_PASSWORD", default="changeme")
+        cls.ADMIN_USERNAME = cls._get_env("ADMIN_USERNAME")
+        cls.ADMIN_PASSWORD = cls._get_env("ADMIN_PASSWORD")
         
         # Security
-        cls.SECRET_KEY = cls._get_env("SECRET_KEY", default="change-this-secret-key-in-production")
-        cls.ACCESS_TOKEN_EXPIRE_MINUTES = cls._parse_int("ACCESS_TOKEN_EXPIRE_MINUTES", default=43200,
+        cls.SECRET_KEY = cls._get_env("SECRET_KEY")
+        cls.ACCESS_TOKEN_EXPIRE_MINUTES = cls._parse_int("ACCESS_TOKEN_EXPIRE_MINUTES",
                                                           min_value=1, max_value=525600)
     
     @classmethod
