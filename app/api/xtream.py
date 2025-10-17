@@ -396,8 +396,13 @@ async def stream_live_channel(
         
         # URL encode parameters to handle special characters
         from urllib.parse import quote
+        
+        # Use internal streaming server for acestream multiplexing
+        # This connects to the aiohttp streaming server (not the main server)
+        streaming_host = config.acestream_streaming_host
+        streaming_port = config.acestream_streaming_port
         expected_stream_url = (
-            f"http://127.0.0.1:{config.server_port}/ace/getstream"
+            f"http://{streaming_host}:{streaming_port}/ace/getstream"
             f"?id={channel.acestream_id}"
             f"&username={username}"
             f"&client_ip={quote(real_client_ip)}"
