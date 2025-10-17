@@ -67,7 +67,7 @@ cd unified-iptv-acestream
 pip install -r requirements.txt
 
 # Run interactive setup wizard
-python3 setup_wizard.py
+python3 setup.py
 ```
 
 The wizard will guide you through:
@@ -128,7 +128,7 @@ The `.env` file contains all configurations (26 variables):
 #### Server
 ```env
 SERVER_HOST=0.0.0.0
-SERVER_PORT=58055
+SERVER_PORT=6880
 SERVER_TIMEZONE=Europe/Rome
 SERVER_DEBUG=false
 ```
@@ -136,7 +136,7 @@ SERVER_DEBUG=false
 #### AceStream Engine
 ```env
 ACESTREAM_ENABLED=true
-ACESTREAM_ENGINE_HOST=localhost
+ACESTREAM_ENGINE_HOST=127.0.0.1
 ACESTREAM_ENGINE_PORT=6878
 ACESTREAM_TIMEOUT=15
 ```
@@ -144,7 +144,7 @@ ACESTREAM_TIMEOUT=15
 #### AceStream Streaming (Advanced)
 ```env
 ACESTREAM_STREAMING_HOST=127.0.0.1
-ACESTREAM_STREAMING_PORT=8001
+ACESTREAM_STREAMING_PORT=6881
 ACESTREAM_CHUNK_SIZE=8192
 ACESTREAM_EMPTY_TIMEOUT=60.0
 ACESTREAM_NO_RESPONSE_TIMEOUT=10.0
@@ -152,13 +152,13 @@ ACESTREAM_NO_RESPONSE_TIMEOUT=10.0
 
 #### Scraper
 ```env
-SCRAPER_URLS=http://example.com/playlist.m3u
-SCRAPER_UPDATE_INTERVAL=3600
+SCRAPER_URLS=https://wafy80.github.io/m3u
+SCRAPER_UPDATE_INTERVAL=86400
 ```
 
 #### EPG
 ```env
-EPG_SOURCES=https://iptvx.one/EPG_NOARCH,https://epg.pw/xmltv/epg.xml.gz
+EPG_SOURCES=https://wafy80.github.io/epg_light.xml
 EPG_UPDATE_INTERVAL=86400
 EPG_CACHE_FILE=data/epg.xml
 ```
@@ -210,7 +210,7 @@ services:
 
 #### Via SSH Tunnel
 ```bash
-ssh -L 8000:localhost:58055 user@your-server
+ssh -L 8000:localhost:6880 user@your-server
 # Then open: http://localhost:8000
 ```
 
@@ -224,7 +224,7 @@ server {
     ssl_certificate_key /path/to/key.pem;
     
     location / {
-        proxy_pass http://127.0.0.1:58055;
+        proxy_pass http://127.0.0.1:6880;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         
@@ -311,7 +311,7 @@ GET  /playlist.m3u?search={query}
 
 1. Select "Login with Xtream Codes API"
 2. Enter:
-   - **Server**: `http://your-server-ip:58055`
+   - **Server**: `http://your-server-ip:6880`
    - **Username**: admin (or configured)
    - **Password**: (configured password)
 3. Click "Add User"
@@ -321,7 +321,7 @@ GET  /playlist.m3u?search={query}
 1. Go to Settings → General → Playlist
 2. Select "Playlist type: XTREAM CODES"
 3. Enter:
-   - **Server**: `http://your-server-ip:58055`
+   - **Server**: `http://your-server-ip:6880`
    - **Username**: admin
    - **Password**: (configured password)
 
@@ -330,14 +330,14 @@ GET  /playlist.m3u?search={query}
 1. Add Playlist
 2. Select "Xtream Codes API"
 3. Enter:
-   - **Server**: `http://your-server-ip:58055`
+   - **Server**: `http://your-server-ip:6880`
    - **Username**: admin
    - **Password**: (configured password)
 
 ### VLC / Kodi (M3U)
 
 ```bash
-http://your-server-ip:58055/get.php?username=admin&password=yourpass&type=m3u_plus
+http://your-server-ip:6880/get.php?username=admin&password=yourpass&type=m3u_plus
 ```
 
 ## 🎯 Quick Start Examples
@@ -348,7 +348,7 @@ http://your-server-ip:58055/get.php?username=admin&password=yourpass&type=m3u_pl
 git clone https://github.com/wafy80/unified-iptv-acestream.git
 cd unified-iptv-acestream
 pip3 install -r requirements.txt
-python3 setup_wizard.py
+python3 setup.py
 # Follow the wizard (press Enter for defaults)
 python3 main.py
 ```
@@ -425,16 +425,16 @@ tar -xzf backup-20240116.tar.gz
 
 ```bash
 # Health check
-curl http://localhost:58055/health
+curl http://localhost:6880/health
 
 # AceProxy stats
-curl http://localhost:58055/api/aceproxy/stats
+curl http://localhost:6880/api/aceproxy/stats
 
 # Scraper status
-curl http://localhost:58055/api/scraper/status
+curl http://localhost:6880/api/scraper/status
 
 # EPG status
-curl http://localhost:58055/api/epg/status
+curl http://localhost:6880/api/epg/status
 ```
 
 ## 🤝 Contributing
@@ -448,9 +448,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 
 This project combines and extends:
-- [acestream-scraper](https://github.com/acestream/acestream-scraper) - Channel scraping
-- [pyacexy](https://github.com/pyacexy/pyacexy) - AceStream proxy
-- [xtream-api](https://github.com/xtream-codes/xtream-api) - Xtream Codes API implementation
+- [acestream-scraper](https://github.com/Pipepito/acestream-scraper) - Channel scraping
+- [acexy](https://github.com/Javinator9889/acexy) - AceStream proxy
+- [xtream-api](https://github.com/Divarion-D/xtream_api) - Xtream Codes API implementation
+- [acestream_search](https://github.com/vstavrinov/acestream_search) - AceStream search functionality
 
 ## 📞 Support
 
