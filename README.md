@@ -1,19 +1,23 @@
 # Unified IPTV AceStream Platform
 
-A unified IPTV platform that combines the best of acestream-scraper, pyacexy and xtream_api into a complete solution.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
+
+A unified IPTV platform that combines the best of acestream-scraper, pyacexy, and xtream_api into a complete solution for streaming AceStream content via IPTV clients.
 
 ## 🚀 Features
 
 ### Core Features
 - **Automatic Scraping**: Automatic AceStream channel collection from multiple sources
-- **Xtream Codes API**: Full compatibility with IPTV Smarters, Perfect Player, TiviMate
+- **Xtream Codes API**: Full compatibility with IPTV Smarters, Perfect Player, TiviMate, and other IPTV clients
 - **Integrated AceStream Proxy**: Intelligent stream management with multiplexing
 - **Complete EPG**: Electronic Program Guide with aggregation from multiple sources
 - **User Management**: Complete authentication and authorization system
 - **Web Dashboard**: Modern and intuitive administration interface
 
 ### Advanced Features
-- Integrated Acestream Engine with Acexy proxy
+- Integrated AceStream Engine with Acexy proxy
 - ZeroNet support for decentralized sources
 - Cloudflare WARP for geo-unblocking
 - Real-time channel status monitoring
@@ -56,7 +60,7 @@ The easiest way to get started:
 
 ```bash
 # Clone repository
-git clone <repository-url>
+git clone https://github.com/wafy80/unified-iptv-acestream.git
 cd unified-iptv-acestream
 
 # Install dependencies
@@ -78,6 +82,10 @@ The wizard will guide you through:
 ### Method 2: Docker (Production)
 
 ```bash
+# Clone repository
+git clone https://github.com/wafy80/unified-iptv-acestream.git
+cd unified-iptv-acestream
+
 # Create configuration
 cp .env.example .env
 nano .env  # Edit configuration
@@ -90,7 +98,7 @@ docker-compose up -d
 
 ```bash
 # Clone and setup
-git clone <repository-url>
+git clone https://github.com/wafy80/unified-iptv-acestream.git
 cd unified-iptv-acestream
 
 # Create virtual environment
@@ -337,7 +345,7 @@ http://your-server-ip:58055/get.php?username=admin&password=yourpass&type=m3u_pl
 ### Example 1: Fast Setup with Wizard
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/wafy80/unified-iptv-acestream.git
 cd unified-iptv-acestream
 pip3 install -r requirements.txt
 python3 setup_wizard.py
@@ -348,7 +356,7 @@ python3 main.py
 ### Example 2: Quick Docker Compose
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/wafy80/unified-iptv-acestream.git
 cd unified-iptv-acestream
 
 # Only modify password in docker-compose.yml
@@ -428,13 +436,6 @@ curl http://localhost:58055/api/scraper/status
 # EPG status
 curl http://localhost:58055/api/epg/status
 ```
-
-## 📖 Documentation
-
-- **[Setup Wizard Guide](QUICK_START_WIZARD.md)** - Complete setup wizard guide
-- **[Docker Guide](DOCKER_GUIDE.md)** - Complete Docker guide with examples
-- **[Security Update](SECURITY_UPDATE.md)** - Dashboard security information
-- **[Italian README](README_IT.md)** - Italian version
 
 ## 🤝 Contributing
 
