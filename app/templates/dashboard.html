@@ -72,6 +72,16 @@
                         </thead>
                         <tbody>
                             <tr>
+                                <td><i class="bi bi-database"></i> AceStream Engine</td>
+                                <td><span class="badge" id="acestreamEngineStatusBadge">Checking...</span></td>
+                                <td id="acestreamEngineDetails">-</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="checkEngineHealth()">
+                                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td><i class="bi bi-hdd-network"></i> AceProxy</td>
                                 <td><span class="badge" id="aceproxyStatusBadge">Checking...</span></td>
                                 <td id="aceproxyDetails">-</td>
@@ -246,25 +256,48 @@ async function loadStats() {
 // Load service status
 async function loadServiceStatus() {
     try {
-        const response = await fetch('/api/health');
+        const response = await fetch('/api/dashboard/stats');
         const data = await response.json();
         
-        // AceProxy
-        if (data.services.aceproxy) {
-            document.getElementById('aceproxyStatusBadge').className = 'badge bg-success';
-            document.getElementById('aceproxyStatusBadge').textContent = 'Online';
-            document.getElementById('aceproxyDetails').textContent = `${data.aceproxy_streams || 0} active streams`;
-        } else {
-            document.getElementById('aceproxyStatusBadge').className = 'badge bg-danger';
-            document.getElementById('aceproxyStatusBadge').textContent = 'Offline';
-            document.getElementById('aceproxyDetails').textContent = '-';
+        // AceStream Engine
+        if (data.acestream_engine) {
+            const engine = data.acestream_engine;
+            
+            if (engine.available && engine.status === 'healthy') {
+                document.getElementById('acestreamEngineStatusBadge').className = 'badge bg-success';
+                document.getElementById('acestreamEngineStatusBadge').textContent = 'Online';
+                document.getElementById('acestreamEngineDetails').textContent = 
+                    `Version ${engine.version || 'unknown'} (${engine.platform || 'unknown'})`;
+            } else if (engine.status === 'disabled') {
+                document.getElementById('acestreamEngineStatusBadge').className = 'badge bg-secondary';
+                document.getElementById('acestreamEngineStatusBadge').textContent = 'Disabled';
+                document.getElementById('acestreamEngineDetails').textContent = 'AceStream not enabled';
+            } else {
+                document.getElementById('acestreamEngineStatusBadge').className = 'badge bg-danger';
+                document.getElementById('acestreamEngineStatusBadge').textContent = 'Offline';
+                document.getElementById('acestreamEngineDetails').textContent = engine.message || 'Not available';
+            }
+        }
+        
+        // AceProxy service (for streaming)
+        if (data.active_streams !== undefined) {
+            if (data.active_streams >= 0) {
+                document.getElementById('aceproxyStatusBadge').className = 'badge bg-success';
+                document.getElementById('aceproxyStatusBadge').textContent = 'Online';
+                document.getElementById('aceproxyDetails').textContent = `${data.active_streams} active streams`;
+            } else {
+                document.getElementById('aceproxyStatusBadge').className = 'badge bg-secondary';
+                document.getElementById('aceproxyStatusBadge').textContent = 'Disabled';
+                document.getElementById('aceproxyDetails').textContent = '-';
+            }
         }
         
         // Scraper
-        if (data.services.scraper) {
+        if (data.scraper_urls !== undefined) {
             document.getElementById('scraperStatusBadge').className = 'badge bg-success';
             document.getElementById('scraperStatusBadge').textContent = 'Running';
-            document.getElementById('scraperDetails').textContent = 'Active';
+            document.getElementById('scraperDetails').textContent = 
+                `${data.enabled_scraper_urls || 0}/${data.scraper_urls || 0} sources enabled`;
         } else {
             document.getElementById('scraperStatusBadge').className = 'badge bg-warning';
             document.getElementById('scraperStatusBadge').textContent = 'Idle';
@@ -272,10 +305,10 @@ async function loadServiceStatus() {
         }
         
         // EPG
-        if (data.services.epg) {
+        if (data.epg_sources !== undefined) {
             document.getElementById('epgStatusBadge').className = 'badge bg-success';
             document.getElementById('epgStatusBadge').textContent = 'Running';
-            document.getElementById('epgDetails').textContent = 'Active';
+            document.getElementById('epgDetails').textContent = `${data.epg_sources || 0} sources configured`;
         } else {
             document.getElementById('epgStatusBadge').className = 'badge bg-warning';
             document.getElementById('epgStatusBadge').textContent = 'Idle';
@@ -284,6 +317,19 @@ async function loadServiceStatus() {
     } catch (error) {
         console.error('Error loading service status:', error);
     }
+}
+
+// Manually check engine health
+async function checkEngineHealth() {
+    const badge = document.getElementById('acestreamEngineStatusBadge');
+    const details = document.getElementById('acestreamEngineDetails');
+    
+    badge.className = 'badge bg-secondary';
+    badge.textContent = 'Checking...';
+    details.textContent = 'Refreshing...';
+    
+    // Wait a bit then reload
+    setTimeout(loadServiceStatus, 500);
 }
 
 // Load active streams

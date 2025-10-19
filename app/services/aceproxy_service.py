@@ -80,6 +80,49 @@ class AceProxyService:
         
         logger.info("AceProxy service stopped")
     
+    async def check_engine_health(self) -> dict:
+        """Check AceStream engine health status"""
+        try:
+            url = f"{self.base_url}/webui/api/service?method=get_version"
+            timeout = aiohttp.ClientTimeout(total=5)
+            
+            async with self.session.get(url, timeout=timeout) as response:
+                if response.status != 200:
+                    return {
+                        "status": "error",
+                        "available": False,
+                        "message": f"HTTP {response.status}"
+                    }
+                
+                data = await response.json()
+                
+                # Check if error is null (successful response)
+                if data.get("error") is None:
+                    return {
+                        "status": "healthy",
+                        "available": True,
+                        "version": data.get("result", {}).get("version", "unknown"),
+                        "platform": data.get("result", {}).get("platform", "unknown")
+                    }
+                else:
+                    return {
+                        "status": "error",
+                        "available": False,
+                        "message": data.get("error", "Unknown error")
+                    }
+        except asyncio.TimeoutError:
+            return {
+                "status": "timeout",
+                "available": False,
+                "message": "Connection timeout"
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "available": False,
+                "message": str(e)
+            }
+    
     async def _fetch_stream_info(self, stream_id: str) -> AceStreamInfo:
         """Fetch stream information from AceStream engine"""
         temp_pid = str(uuid.uuid4())

@@ -418,6 +418,12 @@ def initialize_database():
 
 
 def main():
+    # Check if .env already exists
+    if Path(".env").exists():
+        print_warning(".env file already exists!")
+        print_info("Setup cancelled")
+        return
+
     """Main setup wizard"""
     print_header("Unified IPTV AceStream Setup Wizard")
     
@@ -427,15 +433,7 @@ def main():
     # Load defaults from .env.example
     defaults = load_env_example()
     print()
-    
-    # Check if .env already exists
-    if Path(".env").exists():
-        print_warning(".env file already exists!")
-        if not ask_yes_no("Do you want to overwrite it?", False):
-            print_info("Setup cancelled")
-            return
-        print()
-    
+        
     # Collect all configuration
     config = {}
     

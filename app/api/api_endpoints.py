@@ -54,6 +54,23 @@ async def get_dashboard_stats(request: Request, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error getting active streams: {e}")
     
+    # Check AceStream engine health
+    acestream_engine_status = {
+        "status": "disabled",
+        "available": False
+    }
+    try:
+        aceproxy = request.app.state.aceproxy_service
+        if aceproxy:
+            acestream_engine_status = await aceproxy.check_engine_health()
+    except Exception as e:
+        logger.error(f"Error checking AceStream engine health: {e}")
+        acestream_engine_status = {
+            "status": "error",
+            "available": False,
+            "message": str(e)
+        }
+    
     return {
         "total_channels": total_channels,
         "online_channels": online_channels,
@@ -65,7 +82,8 @@ async def get_dashboard_stats(request: Request, db: Session = Depends(get_db)):
         "enabled_scraper_urls": enabled_scraper_urls,
         "epg_sources": total_epg_sources,
         "active_streams": active_streams,
-        "active_connections": total_clients
+        "active_connections": total_clients,
+        "acestream_engine": acestream_engine_status
     }
 
 

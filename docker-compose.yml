@@ -12,9 +12,8 @@ services:
       - ACESTREAM_ENGINE_HOST=acestream
     depends_on:
       - acestream
-
+    restart: unless-stopped
+    
   acestream:
     image: wafy80/acestream
-    ports:
-      - "6878:6878"
     restart: unless-stopped

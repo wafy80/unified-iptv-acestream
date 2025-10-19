@@ -5,14 +5,19 @@ import asyncio
 import logging
 import sys
 import os
+import time
+import hashlib
 from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, Response
+
 from sqlalchemy.orm import Session
 
+from setup import main as setup_app
 from app.config import get_config
 from app.utils.auth import create_user
 from app.services.aceproxy_service import AceProxyService
@@ -25,6 +30,7 @@ from app.api import api_endpoints
 from app.api import aceproxy
 from app.api import logs
 from app.models import User, ScraperURL, EPGSource, Setting
+from acestream_search import main as engine, get_options, __version__
 
 # Get base directory
 BASE_DIR = Path(__file__).resolve().parent
@@ -37,14 +43,18 @@ STATIC_DIR.mkdir(parents=True, exist_ok=True)
 (STATIC_DIR / "js").mkdir(exist_ok=True)
 (STATIC_DIR / "favicon").mkdir(exist_ok=True)
 
-# Configure logging
+# Ensure logs directory exists
+(BASE_DIR / "logs").mkdir(exist_ok=True)
+
+# Configure logging with force=True to override any existing config
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler(str(BASE_DIR / 'logs/app.log'))
-    ]
+        logging.FileHandler(str(BASE_DIR / 'logs/app.log'), mode='a')
+    ],
+    force=True
 )
 
 logger = logging.getLogger(__name__)
@@ -203,12 +213,10 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 @app.get("/favicon.ico")
 async def favicon():
     """Serve favicon to avoid 404 errors"""
-    from fastapi.responses import FileResponse
     favicon_path = STATIC_DIR / "favicon" / "favicon.svg"
     if favicon_path.exists():
         return FileResponse(favicon_path, media_type="image/svg+xml")
     # Return 204 No Content if favicon doesn't exist
-    from fastapi.responses import Response
     return Response(status_code=204)
 
 # Include routers - ORDER MATTERS! Most specific first
@@ -249,6 +257,58 @@ async def health_check(request: Request):
     
     return health_status
 
+# Use two routing rules of Your choice where playlist extension does matter.
+@app.get('/m3u')
+@app.get('/search.m3u')
+@app.get('/search.m3u8')
+def search(request: Request):
+    args = get_args(request)
+    # return str(args)
+    if args.xml_epg:
+        content_type = 'text/xml'
+    elif args.json:
+        content_type = 'application/json'
+    else:
+        content_type = 'application/x-mpegURL'
+
+    CACHE_DIR = 'tmp/cache'
+    CACHE_EXPIRY = 300
+    if not os.path.exists(CACHE_DIR):
+        os.makedirs(CACHE_DIR)
+
+    def generate():               
+        cache_key = hashlib.md5(str(args).encode('utf-8')).hexdigest()
+        cache_file = os.path.join(CACHE_DIR, cache_key)
+        temp_cache_file = cache_file + '.tmp'
+        if os.path.exists(cache_file) and (time.time() - os.path.getmtime(cache_file)) < CACHE_EXPIRY:
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    yield line
+        else:
+            try:
+                with open(temp_cache_file, 'w', encoding='utf-8') as f:                              
+                    for page in engine(args):
+                        f.write(page + '\n')
+                os.rename(temp_cache_file, cache_file)
+            finally: 
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        yield line
+
+    if 'version' in args:
+        return Response(__version__ + '\n', media_type='text/plain')
+    if 'help' in args:
+        return Response(args.help, media_type='text/plain')
+    if 'usage' in args:
+        return Response(args.usage, media_type='text/plain')
+    if args.url:
+        redirect_url = next(x for x in generate()).strip('\n')
+        response = Response('', media_type='')
+        response.headers['Location'] = redirect_url
+        response.headers['Content-Type'] = ''
+        response.status_code = 302
+        return response
+    return Response(''.join(generate()), media_type=content_type)
 
 @app.get("/")
 async def root():
@@ -268,11 +328,31 @@ async def root():
         }
     }
 
+def get_args(request: Request):
+    opts = {'prog': str(request.base_url)}
+    for item in request.query_params:
+        opts[item] = request.query_params[item]
+    if 'query' not in opts:
+        opts['query'] = ''
+    args = get_options(opts)
+    return args
 
 if __name__ == "__main__":
     import uvicorn
     
+    setup_app()  # Run setup on startup
     config = get_config()
+    
+    # Configure uvicorn logging to also write to file
+    log_config = uvicorn.config.LOGGING_CONFIG
+    log_config["handlers"]["file"] = {
+        "class": "logging.FileHandler",
+        "filename": str(BASE_DIR / "logs/app.log"),
+        "formatter": "default",
+        "mode": "a"
+    }
+    log_config["loggers"]["uvicorn"]["handlers"].append("file")
+    log_config["loggers"]["uvicorn.access"]["handlers"].append("file")
     
     # Run unified server on single port
     uvicorn.run(
@@ -280,5 +360,6 @@ if __name__ == "__main__":
         host=config.server_host,
         port=config.server_port,
         reload=config.server_debug,
-        log_level="info"
+        log_level="info",
+        log_config=log_config
     )
