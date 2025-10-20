@@ -134,7 +134,21 @@ def get_base_url(request: Request) -> str:
     if forwarded_host:
         return f"{forwarded_proto}://{forwarded_host}"
     
-    return f"http://{config.server_host}:{config.server_port}"
+    # If SERVER_HOST is 0.0.0.0 (listen on all interfaces), use the actual request host
+    # This is important for Docker deployments where the server binds to 0.0.0.0
+    # but clients access it via the actual host IP/domain
+    server_host = config.server_host
+    if server_host == "0.0.0.0":
+        # Use the Host header from the request (includes port if non-standard)
+        host_header = request.headers.get("host")
+        if host_header:
+            return f"http://{host_header}"
+        # Fallback: use client's destination (what they connected to)
+        # This works for direct connections
+        if hasattr(request, "url") and request.url.hostname:
+            return f"{request.url.scheme}://{request.url.netloc}"
+    
+    return f"http://{server_host}:{config.server_port}"
 
 
 @router.get("/player_api.php")
@@ -610,6 +624,89 @@ async def get_epg_xml(
     xml_content = epg_service.generate_epg_xml()
     
     return Response(content=xml_content, media_type="application/xml")
+
+
+@router.get("/playlist.m3u")
+async def get_playlist_m3u(
+    request: Request,
+    refresh: Optional[bool] = Query(False, description="Force refresh channels from scraper"),
+    category: Optional[str] = Query(None, description="Filter by category name"),
+    search: Optional[str] = Query(None, description="Search channels by name"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get M3U playlist without authentication (for simple access)
+    
+    Examples:
+    - GET /playlist.m3u - Get all channels
+    - GET /playlist.m3u?refresh=true - Force refresh from scraper
+    - GET /playlist.m3u?category=Sports - Get only Sports category
+    - GET /playlist.m3u?search=football - Search for channels with 'football' in name
+    """
+    
+    # Trigger refresh if requested
+    if refresh:
+        try:
+            from main import scraper_service
+            if scraper_service:
+                logger.info("Refresh requested, triggering scraper...")
+                await scraper_service.scrape_m3u_sources(db)
+        except Exception as e:
+            logger.error(f"Error during refresh: {e}")
+    
+    base_url = get_base_url(request)
+    
+    # Generate M3U header
+    m3u_lines = [f'#EXTM3U url-tvg="{base_url}/xmltv.php"']
+    
+    # Build query
+    query = db.query(Channel).filter(Channel.is_active == True)
+    
+    # Apply category filter if provided
+    if category:
+        query = query.join(Category).filter(Category.name.ilike(f"%{category}%"))
+    
+    # Apply search filter if provided
+    if search:
+        query = query.filter(Channel.name.ilike(f"%{search}%"))
+    
+    channels = query.order_by(Channel.display_order, Channel.name).all()
+    
+    for channel in channels:
+        # Build EXTINF line
+        extinf_parts = [f'#EXTINF:-1']
+        
+        if channel.logo_url:
+            extinf_parts.append(f'tvg-logo="{channel.logo_url}"')
+        
+        if channel.epg_id:
+            extinf_parts.append(f'tvg-id="{channel.epg_id}"')
+        
+        if channel.category:
+            extinf_parts.append(f'group-title="{channel.category.name}"')
+        
+        extinf_parts.append(f',{channel.name}')
+        
+        m3u_lines.append(' '.join(extinf_parts))
+        
+        # Determine stream URL
+        # For AceStream channels, use the aceproxy endpoint
+        if channel.acestream_id:
+            config = get_config()
+            # Use the aceproxy endpoint format for compatibility
+            stream_url = f"http://127.0.0.1:{config.acestream_engine_port}/ace/getstream?id={channel.acestream_id}"
+        elif channel.stream_url:
+            # For direct URLs, use them as-is
+            stream_url = channel.stream_url
+        else:
+            # Skip channels without a stream source
+            continue
+        
+        m3u_lines.append(stream_url)
+    
+    m3u_content = '\n'.join(m3u_lines)
+    
+    return Response(content=m3u_content, media_type="audio/x-mpegurl")
 
 
 @router.post("/epg/update")

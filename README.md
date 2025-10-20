@@ -94,6 +94,12 @@ nano .env  # Edit configuration
 docker-compose up -d
 ```
 
+**Important Notes for Docker:**
+- Keep `SERVER_HOST=0.0.0.0` in your `.env` file when running in Docker
+- Do NOT set `SERVER_HOST` to a specific IP address (e.g., `192.168.100.130`) - this will cause binding errors
+- The application automatically detects the actual hostname from client requests, so URLs in playlists will use the correct IP/hostname that clients connect to
+- The `logs` directory is automatically mounted to persist application logs
+
 ### Method 3: Manual Installation
 
 ```bash
@@ -292,18 +298,27 @@ DELETE /api/users/{id}            # Delete user
 ### M3U Playlist
 
 ```
-# Complete playlist
+# Complete playlist (no authentication required)
 GET  /playlist.m3u
 
-# Playlist with forced refresh
+# Playlist with forced refresh from scraper sources
 GET  /playlist.m3u?refresh=true
 
-# Filtered playlist by category
+# Filtered playlist by category (partial match)
 GET  /playlist.m3u?category={name}
 
-# Playlist with search
+# Playlist with search (finds channels with matching names)
 GET  /playlist.m3u?search={query}
+
+# Combine filters
+GET  /playlist.m3u?category=Sport&search=football
 ```
+
+**Note:** The `/playlist.m3u` endpoint generates a playlist with AceStream URLs in the format:
+```
+http://127.0.0.1:6878/ace/getstream?id={acestream_id}
+```
+These URLs are meant to be used with AceStream Engine running on the same machine as your IPTV client. For remote access through this platform, use the Xtream Codes API endpoints with authentication instead.
 
 ## 📺 Usage with IPTV Players
 

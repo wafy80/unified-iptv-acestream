@@ -7,6 +7,7 @@ services:
       - "6880:6880"
     volumes:
       - ./data:/app/data
+      - ./logs:/app/logs
       - ./.env:/app/.env
     environment:
       - ACESTREAM_ENGINE_HOST=acestream
