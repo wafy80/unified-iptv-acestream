@@ -10,7 +10,7 @@ from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 
 from app.models import Channel, Category, ScraperURL, EPGSource
-from app.utils.auth import SessionLocal  # Fix import
+from app.utils.auth import SessionLocal
 
 logger = logging.getLogger(__name__)
 
@@ -24,14 +24,10 @@ class M3UParser:
         
     def _get_m3u_list(self) -> List[str]:
         """Download M3U playlist and return as list of lines"""
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36"
-        }
-        timeout = 30
         
         try:
             logger.info(f"Downloading M3U from: {self.m3u_url}")
-            request = requests.get(self.m3u_url, timeout=timeout, headers=headers)
+            request = requests.get(self.m3u_url, timeout=30)
             
             if request.status_code == 200:
                 logger.info(f"M3U downloaded successfully, size: {len(request.text)} bytes")
@@ -64,7 +60,16 @@ class M3UParser:
         match = id_pattern.search(url)
         if match:
             return match.group(1)
-        
+
+        # Pattern for URLs containing acestream infohash as parameter
+        # e.g., http://example.com/stream?infohash=ACESTREAM_ID
+        infohash_pattern = re.compile(r'[?&]infohash=([\w\d]+)')
+        match = infohash_pattern.search(url)
+        if match:
+            from main import get_content_id  # Fix import
+            get_content_id(infohash=match.group(1))
+            return match.group(1)
+
         # Pattern for direct 40-char hex IDs in URL path
         # e.g., http://example.com/ACESTREAM_ID
         hex_pattern = re.compile(r'/([a-fA-F0-9]{40})(?:[/?]|$)')
@@ -128,15 +133,12 @@ class M3UParser:
                 
                 # Extract acestream ID from URL
                 acestream_id = self._extract_acestream_id(line)
+                data["stream_url"] = line
                 if acestream_id:
                     data["acestream_id"] = acestream_id
-                    data["stream_url"] = f"acestream://{acestream_id}"
                     logger.debug(f"Extracted acestream ID: {acestream_id} from: {line}")
                 else:
-                    if line.startswith("http"):
-                        # Keep regular HTTP URLs as-is
-                        data["stream_url"] = line
-                    else:
+                    if not line.startswith("http"):
                         # Skip invalid URLs
                         logger.warning(f"Skipping invalid URL: {line}")
                         continue

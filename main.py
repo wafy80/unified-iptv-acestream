@@ -257,11 +257,8 @@ async def health_check(request: Request):
     
     return health_status
 
-# Use two routing rules of Your choice where playlist extension does matter.
 @app.get('/m3u')
-@app.get('/search.m3u')
-@app.get('/search.m3u8')
-def search(request: Request):
+async def search(request: Request):
     args = get_args(request)
     # return str(args)
     if args.xml_epg:
@@ -336,6 +333,23 @@ def get_args(request: Request):
         opts['query'] = ''
     args = get_options(opts)
     return args
+
+def get_content_id(infohash: str) -> str:
+    """Fetch content_id for a given infohash from the acestream engine API."""
+    import requests
+    try:
+        url = f"http://{config.acestream_engine_host}:{config.acestream_engine_port}/server/api"
+        params = {
+            "api_version": 3,
+            "method": "get_content_id",
+            "infohash": infohash
+        }
+        response = requests.get(url, params=params, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("result", {}).get("content_id")
+    except Exception as e:       
+        return str(e)
 
 if __name__ == "__main__":
     import uvicorn

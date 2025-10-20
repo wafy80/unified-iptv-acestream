@@ -223,9 +223,9 @@ def make_playlist(args, counter, group):
                 stream_type = 'getstream'
 
             return (title + '\n' +
-                    'http://' + args.target + '/ace/' + stream_type + '?id=' +
-                    get_content_id(args,group['items'][0]['infohash']) + '\n')
-
+                    'http://' + args.target + '/ace/' + stream_type + '?infohash=' +
+                    group['items'][0]['infohash'] + '\n')
+    return ''
 
 # build xml epg
 def make_epg(args, group):
@@ -262,24 +262,6 @@ def make_epg(args, group):
         return ''
     else:
         return '  ' + xmlstr.replace('\n', '\n  ')
-
-def get_content_id(args, infohash: str) -> str:
-    """Fetch content_id for a given infohash from the acestream engine API."""
-    import requests
-    try:
-        url = f"http://{args.proxy}/server/api"
-        params = {
-            "api_version": 3,
-            "method": "get_content_id",
-            "infohash": infohash
-        }
-        response = requests.get(url, params=params, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            return data.get("result", {}).get("content_id")
-    except Exception as e:       
-        return str(e)
-
     
 # channels stream generator
 def get_channels(args):
